@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
           
           <div className="flex space-x-4">
             <motion.a 
-              href="https://www.instagram.com/chetan_nagda/" 
+              href="https://www.instagram.com/chetannagdaa/" 
               target="_blank" 
               rel="noopener noreferrer"
               whileHover={{ scale: 1.2, rotate: 5 }}
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
             </motion.a>
             
             <motion.a 
-              href="https://github.com/chetan-nagda" 
+              href="https://github.com/chetannagda" 
               target="_blank" 
               rel="noopener noreferrer"
               whileHover={{ scale: 1.2, rotate: 5 }}
