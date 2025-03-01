@@ -5,23 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { saveAs } from 'file-saver';
 import { Download, Image, Link as LinkIcon, RefreshCw, Check } from 'lucide-react';
 
-// Utility function to convert RGB to hex
-const rgbToHex = (r: number, g: number, b: number): string => {
-  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
-};
-
-// Utility function to convert hex to RGB
-const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
-};
-
 const OnlineQRGenerator: React.FC = () => {
   const [url, setUrl] = useState('https://example.com');
   const [bgColor, setBgColor] = useState('#FFFFFF');
@@ -87,21 +70,33 @@ const OnlineQRGenerator: React.FC = () => {
     const canvas = qrRef.current.querySelector('canvas');
     if (!canvas) return;
 
+    // Create a new canvas with padding
+    const paddedCanvas = document.createElement('canvas');
+    const paddedSize = qrSize + padding * 2;
+    paddedCanvas.width = paddedSize;
+    paddedCanvas.height = paddedSize;
+
+    const ctx = paddedCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Fill the background with padding color
+    ctx.fillStyle = paddingColor;
+    ctx.fillRect(0, 0, paddedSize, paddedSize);
+
+    // Draw the QR code in the center
+    ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
     if (format === 'png') {
-      canvas.toBlob((blob) => {
+      paddedCanvas.toBlob((blob) => {
         if (blob) {
           saveAs(blob, 'qrcode.png');
         }
       });
     } else if (format === 'svg') {
       const svgData = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width + padding * 2}" height="${canvas.height + padding * 2}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="${paddedSize}" height="${paddedSize}">
           <rect width="100%" height="100%" fill="${paddingColor}" />
-          <foreignObject x="${padding}" y="${padding}" width="${canvas.width}" height="${canvas.height}">
-            <div xmlns="http://www.w3.org/1999/xhtml">
-              <img src="${canvas.toDataURL('image/png')}" width="${canvas.width}" height="${canvas.height}" />
-            </div>
-          </foreignObject>
+          <image href="${paddedCanvas.toDataURL('image/png')}" width="${paddedSize}" height="${paddedSize}" />
         </svg>
       `;
 
@@ -110,28 +105,6 @@ const OnlineQRGenerator: React.FC = () => {
     }
 
     setShowDownloadOptions(false);
-  };
-
-  // Function to handle RGB input changes
-  const handleRgbChange = (colorType: 'bg' | 'fg' | 'padding', value: { r?: number; g?: number; b?: number }) => {
-    const currentHex = colorType === 'bg' ? bgColor : colorType === 'fg' ? fgColor : paddingColor;
-    const currentRgb = hexToRgb(currentHex) || { r: 0, g: 0, b: 0 };
-
-    const newRgb = {
-      r: value.r !== undefined ? value.r : currentRgb.r,
-      g: value.g !== undefined ? value.g : currentRgb.g,
-      b: value.b !== undefined ? value.b : currentRgb.b,
-    };
-
-    const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
-
-    if (colorType === 'bg') {
-      setBgColor(newHex);
-    } else if (colorType === 'fg') {
-      setFgColor(newHex);
-    } else if (colorType === 'padding') {
-      setPaddingColor(newHex);
-    }
   };
 
   return (
@@ -153,11 +126,6 @@ const OnlineQRGenerator: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white p-6 rounded-lg shadow-lg"
         >
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <LinkIcon className="mr-2 text-indigo-600" size={20} />
-            Enter URL
-          </h2>
-
           <div className="mb-6">
             <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
               Website or Link
@@ -176,7 +144,6 @@ const OnlineQRGenerator: React.FC = () => {
             <h3 className="text-lg font-medium mb-3">Customize Colors</h3>
 
             <div className="flex flex-col space-y-4">
-              {/* Background Color */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium text-gray-700">
@@ -197,47 +164,11 @@ const OnlineQRGenerator: React.FC = () => {
                     />
                     <div className="absolute right-0 bg-white p-4 rounded-lg shadow-lg">
                       <HexColorPicker color={bgColor} onChange={setBgColor} />
-                      <div className="mt-4 flex space-x-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(bgColor)?.r || 0}
-                          onChange={(e) =>
-                            handleRgbChange('bg', { r: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="R"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(bgColor)?.g || 0}
-                          onChange={(e) =>
-                            handleRgbChange('bg', { g: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="G"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(bgColor)?.b || 0}
-                          onChange={(e) =>
-                            handleRgbChange('bg', { b: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="B"
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* QR Code Color */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium text-gray-700">
@@ -258,47 +189,11 @@ const OnlineQRGenerator: React.FC = () => {
                     />
                     <div className="absolute right-0 bg-white p-4 rounded-lg shadow-lg">
                       <HexColorPicker color={fgColor} onChange={setFgColor} />
-                      <div className="mt-4 flex space-x-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(fgColor)?.r || 0}
-                          onChange={(e) =>
-                            handleRgbChange('fg', { r: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="R"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(fgColor)?.g || 0}
-                          onChange={(e) =>
-                            handleRgbChange('fg', { g: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="G"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(fgColor)?.b || 0}
-                          onChange={(e) =>
-                            handleRgbChange('fg', { b: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="B"
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Padding Color */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium text-gray-700">
@@ -319,41 +214,6 @@ const OnlineQRGenerator: React.FC = () => {
                     />
                     <div className="absolute right-0 bg-white p-4 rounded-lg shadow-lg">
                       <HexColorPicker color={paddingColor} onChange={setPaddingColor} />
-                      <div className="mt-4 flex space-x-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(paddingColor)?.r || 0}
-                          onChange={(e) =>
-                            handleRgbChange('padding', { r: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="R"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(paddingColor)?.g || 0}
-                          onChange={(e) =>
-                            handleRgbChange('padding', { g: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="G"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="255"
-                          value={hexToRgb(paddingColor)?.b || 0}
-                          onChange={(e) =>
-                            handleRgbChange('padding', { b: parseInt(e.target.value) })
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md"
-                          placeholder="B"
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
