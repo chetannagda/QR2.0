@@ -49,9 +49,9 @@ const Footer: React.FC = () => {
           </div>
         </div>
         
-        <div className="mt-4 text-center text-gray-400 text-sm">
+{/*         <div className="mt-4 text-center text-gray-400 text-sm">
           <p>© {new Date().getFullYear()} QR Code Generator. All rights reserved.</p>
-        </div>
+        </div> */}
       </div>
     </footer>
   );
