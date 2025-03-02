@@ -198,7 +198,7 @@ const OfflineQRGenerator: React.FC = () => {
                       value={contactInfo.name}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="John Doe"
+                      placeholder="Chetan Nagda"
                       required
                     />
                   </div>
@@ -214,7 +214,7 @@ const OfflineQRGenerator: React.FC = () => {
                       value={contactInfo.phone}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="+1 (555) 123-4567"
+                      placeholder="+91 98765-43210"
                       required
                     />
                   </div>
@@ -230,7 +230,7 @@ const OfflineQRGenerator: React.FC = () => {
                       value={contactInfo.email}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="john.doe@example.com"
+                      placeholder="chetan23rd@gmail.com"
                     />
                   </div>
                   
@@ -245,7 +245,7 @@ const OfflineQRGenerator: React.FC = () => {
                       value={contactInfo.address}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="123 Main St, City, Country"
+                      placeholder="Udaipur , Rajasthan"
                     />
                   </div>
                 </div>
